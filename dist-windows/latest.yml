@@ -1,0 +1,9 @@
+# latest.yml (for electron-updater)
+version: 1.0.0
+files:
+  - url: SerialVision-Pro-Setup.exe
+    sha512: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    size: 89210473
+path: SerialVision-Pro-Setup.exe
+sha512: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+releaseDate: '2024-01-15T10:00:00.000Z'
