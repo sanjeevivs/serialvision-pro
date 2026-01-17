@@ -4,19 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SerialVision Pro - Windows Serial Terminal</title>
-    <link rel="icon" href="favicon.ico">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%2300d4aa' rx='15' width='100' height='100'/><text y='.9em' x='50%' text-anchor='middle' font-size='70' fill='white' font-family='system-ui'>SV</text></svg>">
     <style>
         :root {
             --primary: #00d4aa;
             --primary-dark: #00b894;
+            --primary-light: #55efc4;
             --secondary: #ff7675;
-            --background: #0d1117;
-            --surface: #161b22;
-            --surface-light: #21262d;
-            --text-primary: #e6edf3;
-            --text-secondary: #8b949e;
-            --success: #3fb950;
-            --border: #30363d;
+            --accent: #74b9ff;
+            --background: #0a0e14;
+            --surface: #11141c;
+            --surface-light: #1a1f29;
+            --surface-elevated: #222836;
+            --text-primary: #f0f4f8;
+            --text-secondary: #8b95a5;
+            --text-muted: #5a6270;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.12);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 30px rgba(0, 212, 170, 0.2);
         }
 
         * {
@@ -25,336 +35,1053 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--background);
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: 1.7;
+            overflow-x: hidden;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
+        }
+
+        /* Background Effects */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-gradient::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(0, 212, 170, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 80%, rgba(116, 185, 255, 0.06) 0%, transparent 40%),
+                        radial-gradient(circle at 50% 50%, rgba(255, 118, 117, 0.04) 0%, transparent 50%);
+            animation: bgPulse 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgPulse {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(2%, 2%) scale(1.05); }
         }
 
         /* Header */
         .header {
-            background: linear-gradient(135deg, var(--surface) 0%, var(--surface-light) 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 14, 20, 0.8);
+            backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
-            padding: 20px 0;
+            padding: 16px 0;
+            transition: all 0.3s ease;
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
-            font-size: 18px;
+            font-weight: 800;
+            font-size: 16px;
+            box-shadow: var(--shadow-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            100% { left: 100%; }
         }
 
         .logo-text {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            background: linear-gradient(90deg, var(--primary) 0%, #00f5d4 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .header-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: 8px;
+            color: var(--background);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .header-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
         }
 
         /* Hero Section */
         .hero {
-            padding: 60px 0;
+            padding: 160px 0 100px;
             text-align: center;
-            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--primary);
+            margin-bottom: 24px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .hero-badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
         }
 
         .hero h1 {
-            font-size: 2.8rem;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+
+        .hero-title-gradient {
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 50%, var(--accent) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .hero p {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             color: var(--text-secondary);
-            max-width: 700px;
-            margin: 0 auto 30px;
+            max-width: 640px;
+            margin: 0 auto 40px;
+            animation: fadeInUp 0.6s ease 0.2s both;
         }
 
-        /* Windows Download Section */
-        .windows-download {
-            background: var(--surface);
-            border-radius: 12px;
-            padding: 40px;
-            margin: 40px auto;
-            max-width: 600px;
-            border: 2px solid var(--border);
-            text-align: center;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .windows-icon {
-            font-size: 64px;
-            color: #00adef;
-            margin-bottom: 20px;
+        .hero-cta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease 0.3s both;
         }
 
-        .download-btn {
+        .btn-primary {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            padding: 18px 40px;
+            gap: 10px;
+            padding: 16px 32px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             color: var(--background);
-            text-decoration: none;
             font-weight: 700;
-            font-size: 1.2rem;
-            margin: 20px 0;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 40px rgba(0, 212, 170, 0.35);
+        }
+
+        .btn-primary svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
             transition: all 0.3s ease;
         }
 
-        .download-btn:hover {
+        .btn-secondary:hover {
+            background: var(--surface-light);
+            border-color: var(--primary);
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 212, 170, 0.3);
         }
 
-        .download-size {
-            font-size: 0.9rem;
+        /* Quick Stats */
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin-top: 60px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease 0.4s both;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .hero-stat-label {
+            font-size: 0.875rem;
             color: var(--text-secondary);
-            margin-top: 10px;
+            margin-top: 4px;
         }
 
-        /* Security Badge */
+        /* Download Section */
+        .download-section {
+            margin: 80px 0;
+        }
+
+        .download-card {
+            background: linear-gradient(145deg, var(--surface) 0%, var(--surface-light) 100%);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .download-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .download-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .download-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.15) 0%, rgba(0, 184, 148, 0.1) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: var(--primary);
+            border: 1px solid rgba(0, 212, 170, 0.2);
+        }
+
+        .download-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .download-card > p {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .download-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            color: var(--primary);
+        }
+
         .security-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            background: rgba(63, 185, 80, 0.1);
-            border: 1px solid var(--success);
-            border-radius: 20px;
+            padding: 10px 20px;
+            background: rgba(0, 184, 148, 0.1);
+            border: 1px solid rgba(0, 184, 148, 0.3);
+            border-radius: 50px;
             color: var(--success);
-            font-size: 0.9rem;
-            margin: 20px 0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 24px;
         }
 
-        /* Instructions */
-        .instructions {
+        .security-badge svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Features Section */
+        .features-section {
+            margin: 100px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: clamp(1.75rem, 3vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .section-header p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .feature-card {
             background: var(--surface);
-            border-radius: 12px;
-            padding: 30px;
-            margin: 40px 0;
             border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .instructions h3 {
-            color: var(--primary);
-            margin-bottom: 20px;
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.05) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.15) 0%, rgba(0, 184, 148, 0.1) 100%);
+            border-radius: 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.2) 0%, rgba(0, 184, 148, 0.15) 100%);
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            position: relative;
+        }
+
+        /* Installation Section */
+        .installation-section {
+            margin: 100px 0;
+        }
+
+        .installation-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+        }
+
+        .installation-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .installation-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.15) 0%, rgba(116, 185, 255, 0.1) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .installation-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .installation-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
         }
 
         .step {
-            margin-bottom: 20px;
-            padding-left: 20px;
-            border-left: 3px solid var(--primary);
-        }
-
-        /* Features Grid */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            display: flex;
             gap: 20px;
-            margin: 40px 0;
+            align-items: flex-start;
+            position: relative;
         }
 
-        .feature {
-            background: var(--surface-light);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
+        .step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 56px;
+            width: 2px;
+            height: calc(100% + 8px);
+            background: linear-gradient(to bottom, var(--border), transparent);
         }
 
-        .feature i {
+        .step-number {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--background);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .step-content h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .step-content code {
+            background: var(--surface-elevated);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
             color: var(--primary);
-            font-size: 24px;
-            margin-bottom: 15px;
+            margin-left: 4px;
+        }
+
+        /* Verification Section */
+        .verification-section {
+            margin: 100px 0;
+        }
+
+        .verification-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+        }
+
+        .verification-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .hash-display {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .hash-display-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .hash-display-value {
+            color: var(--primary);
+            word-break: break-all;
+            line-height: 1.8;
+        }
+
+        .verify-command {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface-light);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .verify-command code {
+            color: var(--primary);
         }
 
         /* Footer */
         .footer {
-            text-align: center;
-            padding: 30px 0;
-            color: var(--text-secondary);
+            background: var(--surface);
             border-top: 1px solid var(--border);
-            margin-top: 40px;
+            padding: 60px 0 40px;
+            margin-top: 100px;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .footer-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        .footer-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .footer-tech {
+            margin-top: 20px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
+            .header-nav {
+                display: none;
             }
-            
-            .windows-download {
-                padding: 20px;
+
+            .hero {
+                padding: 120px 0 60px;
             }
-            
-            .download-btn {
-                padding: 15px 30px;
-                font-size: 1rem;
+
+            .hero-stats {
+                gap: 32px;
+            }
+
+            .download-card {
+                padding: 32px 24px;
+            }
+
+            .installation-card {
+                padding: 32px 24px;
+            }
+
+            .step::after {
+                display: none;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Background -->
+    <div class="bg-gradient"></div>
+
     <!-- Header -->
     <header class="header">
         <div class="container">
-            <a href="#" class="logo">
-                <div class="logo-icon">SV</div>
-                <div class="logo-text">SerialVision Pro</div>
-            </a>
+            <div class="header-inner">
+                <a href="#" class="logo">
+                    <div class="logo-icon">SV</div>
+                    <span class="logo-text">SerialVision Pro</span>
+                </a>
+                <nav class="header-nav">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#install" class="nav-link">Install</a>
+                    <a href="https://github.com/sanjeevivs/serialvision-pro" class="nav-link">GitHub</a>
+                    <a href="https://github.com/sanjeevivs/serialvision-pro/releases/download/v1.0.0/SerialVision-Pro-Setup.exe" class="header-btn">Download</a>
+                </nav>
+            </div>
         </div>
     </header>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1>SerialVision Pro for Windows</h1>
-            <p>Professional-grade serial terminal and data analyzer. Real-time visualization, anomaly detection, and powerful debugging tools for Windows.</p>
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                Version 1.0.0 Now Available
+            </div>
+            <h1>
+                <span class="hero-title-gradient">Professional Serial Terminal</span><br>
+                for Windows
+            </h1>
+            <p>
+                Advanced serial communication tool with real-time data visualization, 
+                anomaly detection, and powerful debugging capabilities for developers and engineers.
+            </p>
+            <div class="hero-cta">
+                <a href="https://github.com/sanjeevivs/serialvision-pro/releases/download/v1.0.0/SerialVision-Pro-Setup.exe" 
+                   class="btn-primary" 
+                   id="downloadBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download for Windows
+                </a>
+                <a href="#features" class="btn-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    See Features
+                </a>
+            </div>
             
-            <!-- Windows Download Box -->
-            <div class="windows-download">
-                <div class="windows-icon">
-                    <i class="fab fa-windows"></i>
+            <!-- Quick Stats -->
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-value">1-Click</span>
+                    <span class="hero-stat-label">Installation</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">No Admin</span>
+                    <span class="hero-stat-label">Required</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">100%</span>
+                    <span class="hero-stat-label">Offline</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-value">Free</span>
+                    <span class="hero-stat-label">Forever</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download-section" id="download">
+        <div class="container">
+            <div class="download-card">
+                <div class="download-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="36" height="36">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                </div>
+                <h3>Download SerialVision Pro</h3>
+                <p>Windows 10/11 (64-bit)</p>
+                
+                <div class="download-meta">
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                        v1.0.0
+                    </span>
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <span id="fileSize">~85 MB</span>
+                    </span>
                 </div>
                 
-                <h2>Download for Windows</h2>
-                <p>Version 1.0.0 | Windows 10/11 (64-bit)</p>
-                
                 <div class="security-badge">
-                    <i class="fas fa-shield-alt"></i>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <polyline points="9 12 11 14 15 10"></polyline>
+                    </svg>
                     Virus-free • Verified • Safe Download
                 </div>
                 
                 <a href="https://github.com/sanjeevivs/serialvision-pro/releases/download/v1.0.0/SerialVision-Pro-Setup.exe" 
-                   class="download-btn" 
-                   id="downloadBtn">
-                    <i class="fas fa-download"></i>
-                    Download SerialVision Pro
+                   class="btn-primary" 
+                   id="downloadBtnMain">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Download Installer (.exe)
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Powerful Features</h2>
+                <p>Everything you need for serial communication and data analysis</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+                            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                        </svg>
+                    </div>
+                    <h3>Direct Serial Access</h3>
+                    <p>Connect seamlessly to Arduino, ESP32, Raspberry Pi, and any serial device. Plug-and-play with automatic driver detection for most devices.</p>
+                </div>
                 
-                <div class="download-size" id="fileSize">~85 MB • Setup Installer</div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Real-time Plotting</h3>
+                    <p>Automatically extract and visualize numeric values from your serial data streams with smooth, responsive charts and graphs.</p>
+                </div>
                 
-        
-            </div>
-            
-            <!-- Quick Stats -->
-            <div style="display: flex; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap;">
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; color: var(--primary); font-weight: bold;">1-Click</div>
-                    <div style="font-size: 0.9rem; color: var(--text-secondary);">Install</div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="3" y1="15" x2="21" y2="15"></line>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                            <line x1="15" y1="3" x2="15" y2="21"></line>
+                        </svg>
+                    </div>
+                    <h3>Hex Viewer</h3>
+                    <p>Professional hex dump with side-by-side ASCII display for low-level protocol debugging and binary data analysis.</p>
                 </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; color: var(--primary); font-weight: bold;">No Admin</div>
-                    <div style="font-size: 0.9rem; color: var(--text-secondary);">Required</div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </div>
+                    <h3>Anomaly Detection</h3>
+                    <p>Intelligent statistical analysis automatically identifies outliers and alerts you to abnormal data patterns in real-time.</p>
                 </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; color: var(--primary); font-weight: bold;">Offline</div>
-                    <div style="font-size: 0.9rem; color: var(--text-secondary);">Works Completely Offline</div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+                            <polyline points="4 17 10 11 4 5"></polyline>
+                            <line x1="12" y1="19" x2="20" y2="19"></line>
+                        </svg>
+                    </div>
+                    <h3>Data Logging</h3>
+                    <p>Record and export serial data sessions with timestamps. Save to CSV or text format for further analysis.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </div>
+                    <h3>Full Customization</h3>
+                    <p>Configure baud rates, data bits, parity, and stop bits. Create and save custom connection profiles.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Features -->
-    <section class="container">
-        <h2 style="text-align: center; margin: 40px 0 30px; color: var(--text-primary);">Powerful Features</h2>
-        
-        <div class="features-grid">
-            <div class="feature">
-                <i class="fas fa-plug"></i>
-                <h3>Direct Serial Access</h3>
-                <p>Connect to Arduino, ESP32, Raspberry Pi, and any serial device. No drivers needed for most devices.</p>
-            </div>
-            
-            <div class="feature">
-                <i class="fas fa-chart-line"></i>
-                <h3>Real-time Plotting</h3>
-                <p>Automatically extract and plot numeric values from serial data streams in real-time.</p>
-            </div>
-            
-            <div class="feature">
-                <i class="fas fa-hexagon"></i>
-                <h3>Hex Viewer</h3>
-                <p>Professional hex dump with ASCII side-by-side display for low-level protocol debugging.</p>
-            </div>
-            
-            <div class="feature">
-                <i class="fas fa-bolt"></i>
-                <h3>Anomaly Detection</h3>
-                <p>Automatic outlier detection using statistical analysis. Get alerts for abnormal data patterns.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Installation Instructions -->
-    <section class="container">
-        <div class="instructions">
-            <h3><i class="fas fa-laptop"></i> Installation Guide</h3>
-            
-            <div class="step">
-                <h4>Step 1: Download</h4>
-                <p>Click the download button above to get <code>SerialVision-Pro-Setup.exe</code></p>
-            </div>
-            
-            <div class="step">
-                <h4>Step 2: Run Installer</h4>
-                <p>Double-click the downloaded file. Windows SmartScreen may show a warning - click "More info" then "Run anyway"</p>
-            </div>
-            
-            <div class="step">
-                <h4>Step 3: Follow Setup Wizard</h4>
-                <p>The installer will guide you through the installation. Choose installation folder and create shortcuts.</p>
-            </div>
-            
-            <div class="step">
-                <h4>Step 4: Launch & Connect</h4>
-                <p>Launch SerialVision Pro from Start Menu or desktop shortcut. Connect your serial device and start debugging!</p>
+    <!-- Installation Section -->
+    <section class="installation-section" id="install">
+        <div class="container">
+            <div class="installation-card">
+                <div class="installation-header">
+                    <div class="installation-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3>Installation Guide</h3>
+                    </div>
+                </div>
+                
+                <div class="installation-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Download the Installer</h4>
+                            <p>Click the download button above to save <code>SerialVision-Pro-Setup.exe</code> to your computer.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Run the Installer</h4>
+                            <p>Double-click the downloaded file. Windows SmartScreen may show a warning — click "More info" then "Run anyway".</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Follow Setup Wizard</h4>
+                            <p>The installer will guide you through the process. Choose your installation folder and select whether to create desktop shortcuts.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Launch & Connect</h4>
+                            <p>Open SerialVision Pro from the Start Menu or desktop shortcut. Connect your serial device and start debugging immediately!</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Verification -->
-    <section class="container" style="text-align: center; margin: 40px 0;">
-        <h3 style="color: var(--text-primary); margin-bottom: 20px;">Verify Your Download</h3>
-        <div style="background: var(--surface-light); padding: 20px; border-radius: 10px; font-family: monospace;">
-            <div>SHA256 Checksum:</div>
-            <div id="sha256Hash" style="color: var(--primary); word-break: break-all; margin: 10px 0;">
-                0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b
-            </div>
-            <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                Verify with: <code>certutil -hashfile "SerialVision-Pro-Setup.exe" SHA256</code>
+    <!-- Verification Section -->
+    <section class="verification-section">
+        <div class="container">
+            <div class="verification-card">
+                <h3>Verify Your Download</h3>
+                <div class="hash-display">
+                    <div class="hash-display-label">SHA-256 Checksum</div>
+                    <div class="hash-display-value" id="sha256Hash">
+                        0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b
+                    </div>
+                </div>
+                <div class="verify-command">
+                    <span>Verify with:</span>
+                    <code>certutil -hashfile "SerialVision-Pro-Setup.exe" SHA256</code>
+                </div>
             </div>
         </div>
     </section>
@@ -362,45 +1089,55 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>
-                <a href="https://github.com/yoursanjeevivs/serialvision-pro" style="color: var(--primary); text-decoration: none;">
-                    <i class="fab fa-github"></i> View Source Code
-                </a>
-                | 
-                <a href="https://github.com/yoursanjeevivs/serialvision-pro/issues" style="color: var(--primary); text-decoration: none;">
-                    <i class="fas fa-bug"></i> Report Issue
-                </a>
-                | 
-                <a href="#downloadBtn" style="color: var(--primary); text-decoration: none;">
-                    <i class="fas fa-download"></i> Download Again
-                </a>
-            </p>
-            <p style="margin-top: 20px;">SerialVision Pro © 2024 • Windows Desktop Edition</p>
-            <p style="font-size: 0.9rem; margin-top: 10px; color: var(--text-secondary);">
-                Built with Electron • Vue.js • Web Serial API
-            </p>
+            <div class="footer-inner">
+                <div class="footer-links">
+                    <a href="https://github.com/sanjeevivs/serialvision-pro" class="footer-link">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        View Source Code
+                    </a>
+                    <a href="https://github.com/sanjeevivs/serialvision-pro/issues" class="footer-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        Report Issue
+                    </a>
+                    <a href="#download" class="footer-link">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download Again
+                    </a>
+                </div>
+                <p class="footer-copyright">SerialVision Pro © 2026 • Windows Desktop Edition</p>
+                <p class="footer-tech">Built with Electron • Vue.js • Web Serial API</p>
+            </div>
         </div>
     </footer>
 
     <script>
-        // Update file size and hash dynamically if needed
+        // Update file size dynamically from GitHub API
         async function updateDownloadInfo() {
             try {
-                // Get release info from GitHub API
-                const response = await fetch('https://api.github.com/repos/yoursanjeevivs/serialvision-pro/releases/latest');
+                const response = await fetch('https://api.github.com/repos/sanjeevivs/serialvision-pro/releases/latest');
                 const data = await response.json();
                 
-                // Update download button with asset URL
-                const exeAsset = data.assets.find(asset => asset.name.includes('.exe'));
+                const exeAsset = data.assets?.find(asset => asset.name.includes('.exe'));
                 if (exeAsset) {
+                    // Update main download button
                     document.getElementById('downloadBtn').href = exeAsset.browser_download_url;
+                    document.getElementById('downloadBtnMain').href = exeAsset.browser_download_url;
                     
-                    // Format file size
+                    // Update file size display
                     const sizeMB = (exeAsset.size / (1024 * 1024)).toFixed(1);
-                    document.getElementById('fileSize').textContent = `~${sizeMB} MB • Setup Installer`;
+                    document.getElementById('fileSize').textContent = `~${sizeMB} MB`;
                     
-                    // Update download count in UI if needed
-                    console.log(`Download count: ${exeAsset.download_count}`);
+                    console.log(`Download count: ${exeAsset.download_count || 'N/A'}`);
                 }
             } catch (error) {
                 console.log('Could not fetch release info:', error);
@@ -408,12 +1145,30 @@
         }
         
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', updateDownloadInfo);
-        
-        // Add download tracking
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            // You can add analytics here
-            console.log('Download started for Windows version');
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDownloadInfo();
+            
+            // Add smooth scroll for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Track download clicks
+            const downloadBtns = document.querySelectorAll('#downloadBtn, #downloadBtnMain');
+            downloadBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    console.log('Download started');
+                });
+            });
         });
     </script>
 </body>
