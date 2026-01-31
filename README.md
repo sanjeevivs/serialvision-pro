@@ -8,48 +8,45 @@ A professional-grade serial terminal and data analyzer available as both a **web
 - **Access**: Use directly in your browser
 - **Features**: Full functionality via Web Serial API
 - **Installation**: Installable as Progressive Web App
-- **URL**: [https://yoursanjeevivs.github.io/serialvision-pro](https://yoursanjeevivs.github.io/serialvision-pro)
 
 ### 🖥️ **Desktop Version (Windows)**
 - **Platform**: Windows 10/11 (64-bit)
 - **Features**: Enhanced hardware access, native performance
 - **Installation**: One-click installer or portable version
-- **Download**: [Latest Release](https://github.com/yoursanjeevivs/serialvision-pro/releases/latest)
+- **Download**: [Latest Release](https://sanjeevivs.github.io/serialvision-pro/)
 
 ## 📥 **Quick Download**
 
 ### Windows Desktop App:
-[![Download for Windows](https://img.shields.io/badge/Download-Windows_Installer-00d4aa?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/yoursanjeevivs/serialvision-pro/releases/latest/download/SerialVision-Pro-Setup.exe)
-[![Download Portable](https://img.shields.io/badge/Portable_Version-21262d?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/yoursanjeevivs/serialvision-pro/releases/latest/download/SerialVision-Pro-Portable.exe)
-
+[![Download for Windows](https://img.shields.io/badge/Download-Windows_Installer-00d4aa?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/sanjeevivs/serialvision-pro/releases/latest/download/SerialVision-Pro-Setup.exe)
 
 ## 🚀 **Features**
 
 ### **Core Communication**
-- ✅ **Direct Serial Access**: Connect to Arduino, ESP32, Raspberry Pi via USB
-- ✅ **Full-Duplex Communication**: Simultaneous send/receive without data loss
-- ✅ **Configurable Baud Rates**: 300 to 921,600 baud
-- ✅ **Break Signal & DTR/RTS Control**: Professional serial line control
-- ✅ **Automatic Port Detection**: Lists all available serial ports
+- **Direct Serial Access**: Connect to Arduino, ESP32, Raspberry Pi via USB
+- **Full-Duplex Communication**: Simultaneous send/receive without data loss
+- **Configurable Baud Rates**: 300 to 921,600 baud
+- **Break Signal & DTR/RTS Control**: Professional serial line control
+- **Automatic Port Detection**: Lists all available serial ports
 
 ### **Data Visualization**
-- ✅ **Real-time Plotting**: Automatic numeric value extraction from any data stream
-- ✅ **Multi-Channel Support**: Visualize up to 3 data streams simultaneously
-- ✅ **Anomaly Detection**: Statistical outlier detection with configurable thresholds
-- ✅ **Hex Viewer**: Binary data visualization with ASCII side-by-side display
-- ✅ **Spectrogram**: Frequency-domain representation of serial data
+- **Real-time Plotting**: Automatic numeric value extraction from any data stream
+- **Multi-Channel Support**: Visualize up to 3 data streams simultaneously
+- **Anomaly Detection**: Statistical outlier detection with configurable thresholds
+- **Hex Viewer**: Binary data visualization with ASCII side-by-side display
+- **Spectrogram**: Frequency-domain representation of serial data
 
 ### **Professional Workflow**
-- ✅ **Keyboard Macros**: Programmable function keys (F1-F12) for common commands
-- ✅ **Session Persistence**: Save/load complete sessions with all data
-- ✅ **Multi-Format Export**: CSV, JSON, and chart image exports
-- ✅ **Performance Monitoring**: Live FPS, memory usage, and timing statistics
-- ✅ **Auto-scrolling Terminal**: Configurable buffer limits (up to 2000 lines)
+- **Keyboard Macros**: Programmable function keys (F1-F12) for common commands
+- **Session Persistence**: Save/load complete sessions with all data
+- **Multi-Format Export**: CSV, JSON, and chart image exports
+- **Performance Monitoring**: Live FPS, memory usage, and timing statistics
+- **Auto-scrolling Terminal**: Configurable buffer limits (up to 2000 lines)
 
 ## 📦 **Installation**
 
 ### **Desktop App (Windows)**
-1. **Download** the installer from the [Releases page](https://github.com/sanjeevivs/serialvision-pro/releases)
+1. **Download** the installer from the [Landing page](https://sanjeevivs.github.io/serialvision-pro/)
 2. **Run** `SerialVision-Pro-Setup.exe`
 3. **Follow** the installation wizard
 4. **Launch** from Start Menu or desktop shortcut
@@ -73,37 +70,6 @@ A professional-grade serial terminal and data analyzer available as both a **web
 - **Hex View**: Analyze binary data streams
 - **Export Data**: Save sessions as CSV/JSON for further analysis
 
-## 🛠️ **Technical Architecture**
-
-### **Desktop Version (Electron)**
-```
-Electron + Vue.js + Node SerialPort
-├── Main Process: Native system integration
-├── Renderer Process: Vue.js application
-├── Preload Scripts: Secure IPC bridge
-└── Native Modules: Direct hardware access
-```
-
-### **Web Version (PWA)**
-```
-Vue.js + Web Serial API + Chart.js
-├── Service Worker: Offline functionality
-├── Web Serial API: Hardware communication
-├── IndexedDB: Local data storage
-└── Vuetify 3: Material Design UI
-```
-
-## 📁 **Project Structure**
-```
-serialvision-pro/
-├── docs/                    # GitHub Pages landing page
-├── dist-windows/           # Windows desktop builds
-├── index.html             # Main application
-├── manifest.json          # PWA configuration
-├── README.md              # This file
-└── package.json           # Electron configuration
-```
-
 ## 🔧 **Development**
 
 ### **Prerequisites**
@@ -111,38 +77,13 @@ serialvision-pro/
 - Git
 - Windows 10/11 for desktop builds
 
-### **Build Desktop Version**
-```bash
-# Clone repository
-git clone https://github.com/yoursanjeevivs/serialvision-pro.git
-cd serialvision-pro
-
-# Install dependencies
-npm install
-
-# Build for Windows
-npm run build:win
-
-# Output: dist-windows/SerialVision-Pro-Setup.exe
-```
-
-### **Run in Development**
-```bash
-# Web version (local server)
-python -m http.server 8000
-# Visit http://localhost:8000
-
-# Desktop version (Electron)
-npm start
-```
-
 ## 📊 **Version Comparison**
 
 | Feature | Desktop Version | Web Version |
 |---------|----------------|-------------|
 | **Installation** | Native installer | Browser/PWA |
 | **Hardware Access** | Direct via Node SerialPort | Web Serial API |
-| **Offline Use** | ✅ Full functionality | ✅ Limited by PWA |
+| **Offline Use** | Full functionality | Limited by PWA |
 | **Performance** | Native performance | Browser sandboxed |
 | **Updates** | Manual/GitHub Releases | Automatic via service worker |
 | **Platform** | Windows only | Any browser platform |
@@ -180,23 +121,6 @@ Expected SHA256: [CHECKSUM FROM RELEASE]
 ### **Code Transparency**
 - **No Telemetry**: Application doesn't collect user data
 - **Local Storage**: All data stays on your machine
-- **Open Source**: MIT licensed, inspect all code
-
-## 🤝 **Contributing**
-
-We welcome contributions! Here's how:
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** to the branch (`git push origin feature/AmazingFeature`)
-5. **Open** a Pull Request
-
-### **Development Guidelines**
-- Follow existing code style and patterns
-- Test changes on both web and desktop versions
-- Update documentation for new features
-- Keep platform-specific code isolated
 
 ## 📄 **License**
 
@@ -218,20 +142,7 @@ SerialVision Pro is licensed under the **MIT License**. See the [LICENSE](LICENS
 - **Documentation**: This README and landing page
 - **Community**: Share your projects and tips
 
-## 🌟 **Acknowledgements**
-
-### **Built With**
-- [Vue.js](https://vuejs.org/) - Progressive JavaScript Framework
-- [Electron](https://www.electronjs.org/) - Cross-platform desktop apps
-- [Chart.js](https://www.chartjs.org/) - Simple yet flexible JavaScript charting
-- [Vuetify](https://vuetifyjs.com/) - Material Design Component Framework
-- [Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API) - Modern browser hardware access
-
----
-
-## 📈 **Project Roadmap**
-
-### **Planned Features**
+### **Planned future Features**
 - [ ] macOS and Linux desktop versions
 - [ ] Mobile support (serial over Bluetooth)
 - [ ] Plugin system for custom protocols
